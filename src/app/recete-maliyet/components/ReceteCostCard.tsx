@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { calculateRecipeCost, formatCurrency, type Recipe, type StockItem } from '@/lib/storage';
+import { calculateRecipeCost, formatCurrency, type Recipe, type Malzeme } from '@/lib/storage';
 import { Calculator, Package, AlertTriangle } from 'lucide-react';
 
 interface ReceteCostCardProps {
   recipe: Recipe;
-  stockItems: StockItem[];
+  malzemeler: Malzeme[];
 }
 
-export default function ReceteCostCard({ recipe, stockItems }: ReceteCostCardProps) {
+export default function ReceteCostCard({ recipe, malzemeler }: ReceteCostCardProps) {
   const [adet, setAdet] = useState<string>('1');
 
-  const totalCost = calculateRecipeCost(recipe, stockItems);
+  const totalCost = calculateRecipeCost(recipe, malzemeler);
   const adetNum = parseFloat(adet) || 1;
   const unitCost = adetNum > 0 ? totalCost / adetNum : totalCost;
 
@@ -36,9 +36,18 @@ export default function ReceteCostCard({ recipe, stockItems }: ReceteCostCardPro
           <p className="text-sm text-muted-foreground italic">Malzeme eklenmemiş</p>
         ) : (
           recipe.malzemeler.map((ing, idx) => {
-            const stockItem = stockItems.find(s => s.id === ing.stockItemId);
-            const lineCost = stockItem ? ing.miktar * stockItem.birimMaliyet : null;
-            const missing = !stockItem;
+            const malzeme = malzemeler.find(m => m.id === ing.malzemeId);
+            const missing = !malzeme;
+            let lineCost = 0;
+            if (malzeme) {
+              const costPerBase = malzeme.topluFiyat / malzeme.topluMiktar;
+              let converted = ing.miktar;
+              if (ing.birim === 'g' && malzeme.topluBirim === 'kg') converted = ing.miktar / 1000;
+              else if (ing.birim === 'kg' && malzeme.topluBirim === 'g') converted = ing.miktar * 1000;
+              else if (ing.birim === 'ml' && malzeme.topluBirim === 'lt') converted = ing.miktar / 1000;
+              else if (ing.birim === 'lt' && malzeme.topluBirim === 'ml') converted = ing.miktar * 1000;
+              lineCost = converted * costPerBase;
+            }
             return (
               <div
                 key={`ing-row-${idx}`}
@@ -54,7 +63,7 @@ export default function ReceteCostCard({ recipe, stockItems }: ReceteCostCardPro
                     <Package size={13} className="text-muted-foreground shrink-0" />
                   )}
                   <span className={['font-500 truncate', missing ? 'text-critical' : 'text-foreground'].join(' ')}>
-                    {ing.stockItemAd}
+                    {ing.malzemeAd}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-2">
@@ -62,7 +71,7 @@ export default function ReceteCostCard({ recipe, stockItems }: ReceteCostCardPro
                     {ing.miktar} {ing.birim}
                   </span>
                   <span className={['font-600 text-xs min-w-[60px] text-right', missing ? 'text-critical' : 'text-foreground'].join(' ')}>
-                    {missing ? 'Stok yok' : formatCurrency(lineCost!)}
+                    {missing ? 'Malzeme yok' : formatCurrency(lineCost)}
                   </span>
                 </div>
               </div>
@@ -74,7 +83,7 @@ export default function ReceteCostCard({ recipe, stockItems }: ReceteCostCardPro
       {/* Totals */}
       <div className="px-5 pb-4 space-y-3">
         <div className="border-t border-border pt-3 flex items-center justify-between">
-          <span className="text-sm font-600 text-foreground">Toplam Maliyet (1 parti)</span>
+          <span className="text-sm font-600 text-foreground">Toplam Parti Maliyeti</span>
           <span className="text-lg font-700 text-primary">{formatCurrency(totalCost)}</span>
         </div>
 

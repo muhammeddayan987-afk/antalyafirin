@@ -14,6 +14,9 @@ import {
   TrendingUp,
   AlertTriangle,
   ChefHat,
+  Factory,
+  Receipt,
+  BarChart3,
 } from 'lucide-react';
 
 interface NavItem {
@@ -42,23 +45,40 @@ export default function Sidebar({ isOpen, onClose, criticalStockCount = 0 }: Sid
       icon: <LayoutDashboard size={20} />,
     },
     {
+      key: 'nav-malzemeler',
+      label: 'Malzemeler',
+      href: '/stok-y-netimi',
+      icon: <Package size={20} />,
+    },
+    {
+      key: 'nav-recete',
+      label: 'Tarif & Formülasyon',
+      href: '/recete-maliyet',
+      icon: <ChefHat size={20} />,
+    },
+    {
+      key: 'nav-uretim',
+      label: 'Üretim',
+      href: '/uretim',
+      icon: <Factory size={20} />,
+    },
+    {
+      key: 'nav-giderler',
+      label: 'Giderler',
+      href: '/giderler',
+      icon: <Receipt size={20} />,
+    },
+    {
+      key: 'nav-kar-paneli',
+      label: 'Kâr Paneli',
+      href: '/kar-paneli',
+      icon: <BarChart3 size={20} />,
+    },
+    {
       key: 'nav-gelir-gider',
       label: 'Gelir & Gider',
       href: '/gelir-gider-takibi',
       icon: <ArrowLeftRight size={20} />,
-    },
-    {
-      key: 'nav-stok',
-      label: 'Stok Yönetimi',
-      href: '/stok-y-netimi',
-      icon: <Package size={20} />,
-      badge: criticalStockCount > 0 ? criticalStockCount : undefined,
-    },
-    {
-      key: 'nav-recete',
-      label: 'Reçete Maliyet',
-      href: '/recete-maliyet',
-      icon: <ChefHat size={20} />,
     },
   ];
 

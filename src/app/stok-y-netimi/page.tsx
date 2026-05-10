@@ -1,14 +1,14 @@
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
-import StokContent from './components/StokContent';
+import MalzemeContent from './components/MalzemeContent';
 
 export default function StokPage() {
   return (
     <AppLayout
-      pageTitle="Stok Yönetimi"
-      pageSubtitle="Malzeme stok takibi ve otomatik gider kaydı"
+      pageTitle="Malzemeler"
+      pageSubtitle="Toplu alım ve birim envanter yönetimi"
     >
-      <StokContent />
+      <MalzemeContent />
     </AppLayout>
   );
 }

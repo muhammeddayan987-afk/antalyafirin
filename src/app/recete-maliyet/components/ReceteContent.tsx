@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getRecipes, saveRecipes, getStockItems, calculateRecipeCost, formatCurrency, getTodayString, type Recipe, type StockItem } from '@/lib/storage';
+import { getRecipes, saveRecipes, getMalzemeler, calculateRecipeCost, formatCurrency, getTodayString, type Recipe, type Malzeme } from '@/lib/storage';
 import { ChefHat, Plus, Pencil, Trash2, Calculator } from 'lucide-react';
 import ReceteModal from './ReceteModal';
 import ReceteCostCard from './ReceteCostCard';
@@ -9,7 +9,7 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function ReceteContent() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [malzemeler, setMalzemeler] = useState<Malzeme[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
@@ -17,10 +17,8 @@ export default function ReceteContent() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    const r = getRecipes();
-    const s = getStockItems();
-    setRecipes(r);
-    setStockItems(s);
+    setRecipes(getRecipes());
+    setMalzemeler(getMalzemeler());
     setLoading(false);
   }, []);
 
@@ -79,10 +77,10 @@ export default function ReceteContent() {
         <div>
           <h1 className="text-xl font-700 text-foreground flex items-center gap-2">
             <ChefHat size={22} className="text-primary" />
-            Reçete Maliyet Hesaplama
+            Tarif ve Formülasyon
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Ürün reçeteleri oluşturun, stok fiyatlarından otomatik maliyet hesaplayın
+            Ürün reçeteleri oluşturun, kg/g/ml/lt cinsinden malzeme ekleyin, toplam parti maliyetini hesaplayın
           </p>
         </div>
         <button
@@ -102,7 +100,7 @@ export default function ReceteContent() {
           </div>
           <h3 className="text-base font-600 text-foreground mb-1">Henüz reçete yok</h3>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Ekmek, börek gibi ürünler için reçete oluşturun ve stok maliyetlerinden otomatik hesaplayın.
+            Ekmek, börek gibi ürünler için reçete oluşturun ve malzeme maliyetlerinden otomatik hesaplayın.
           </p>
           <button
             onClick={() => { setEditingRecipe(null); setIsModalOpen(true); }}
@@ -120,7 +118,7 @@ export default function ReceteContent() {
               Reçeteler ({recipes.length})
             </h2>
             {recipes.map(recipe => {
-              const totalCost = calculateRecipeCost(recipe, stockItems);
+              const totalCost = calculateRecipeCost(recipe, malzemeler);
               const isSelected = selectedRecipe?.id === recipe.id;
               return (
                 <div
@@ -146,7 +144,7 @@ export default function ReceteContent() {
                       </div>
                       <div className="mt-3 flex items-center gap-4">
                         <div>
-                          <p className="text-xs text-muted-foreground">Toplam Maliyet</p>
+                          <p className="text-xs text-muted-foreground">Toplam Parti Maliyeti</p>
                           <p className="text-base font-700 text-primary">{formatCurrency(totalCost)}</p>
                         </div>
                         <div>
@@ -180,7 +178,7 @@ export default function ReceteContent() {
           {/* Cost detail panel */}
           <div>
             {selectedRecipe ? (
-              <ReceteCostCard recipe={selectedRecipe} stockItems={stockItems} />
+              <ReceteCostCard recipe={selectedRecipe} malzemeler={malzemeler} />
             ) : (
               <div className="bg-card border border-dashed border-border rounded-2xl flex flex-col items-center justify-center py-16 text-center px-6">
                 <Calculator size={28} className="text-muted-foreground mb-3" />
@@ -199,7 +197,7 @@ export default function ReceteContent() {
         onClose={() => { setIsModalOpen(false); setEditingRecipe(null); }}
         onSave={handleSave}
         editingRecipe={editingRecipe}
-        stockItems={stockItems}
+        malzemeler={malzemeler}
       />
 
       <ConfirmModal
